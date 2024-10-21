@@ -27,10 +27,9 @@ plt.show()
 
 # Unisci i dataset per la correlazione
 data = pd.DataFrame({'Gas_Spot': gas_spot, 'TTF_Future': gas_future}).dropna()
-
+#---------------------------------------------------------------------------------------------------------------#
 # Calcolo della correlazione e dell'hedge ratio
-correlation = data.corr().iloc[0, 1]
-
+correlation = data.corr().iloc[0, 1] #correlazione non buonissima
 # Variabile indipendente 
 X = data['TTF_Future']
 # Variabile dipendente 
@@ -50,12 +49,15 @@ plt.xlabel('Prezzo Future NG=F')
 plt.ylabel('Prezzo Future TTF=F')
 plt.grid(True)
 plt.show()
-
-# Predizioni del modello
+#osserviamo una possibile eteroskedasticità
+#sviluppo i test per verificarla
+#---------------------------------------------------------------------------------------------------------------#
+#TEST Breusch-Pagan
+import statsmodels.stats.api as sms
+#il test viene eseguito sui residui, quindi fitto il modello e ottengo i residui
 fitted_values = model.fittedvalues
 residuals = model.resid
-
-# Grafico dei residui rispetto ai valori previsti
+# scatterplot: già si nota eteroschedasticità
 plt.figure(figsize=(10, 6))
 plt.scatter(fitted_values, residuals)
 plt.axhline(y=0, color='red', linestyle='--')
@@ -64,15 +66,42 @@ plt.xlabel('Valori Predetti')
 plt.ylabel('Residui')
 plt.grid(True)
 plt.show()
-
-import statsmodels.stats.api as sms
-
+#test
 test_stat, p_value, _, _ = sms.het_breuschpagan(residuals, model.model.exog)
 print(f"Statistiche del test di Breusch-Pagan: {test_stat}, P-value: {p_value}")
+#se p-value < 0.05: rifiuto l'ipotesi nulla di non etoeroschedasticità
+#in questo caso c'è eteroschedasticità
+#se procedessi l'analisi, utilizzando la pendenza della retta di regressione come hedge ratio la mia stima sarebbe biased!
+#rimane eteroschedastico anche usando standard error robusti come di seguito:
+#model_robust = sm.OLS(Y, X).fit(cov_type='HC3') 
 
 
 
-#osserviamo una possibile eteroskedasticità
+
+
+
+
+
+
+
+
+
+
+correlation_matrix = data.corr()
+
+# Stampa la matrice di correlazione
+print(correlation_matrix)
+
+# Visualizza la matrice di correlazione con una heatmap
+plt.figure(figsize=(8, 6))
+sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt='.2f', square=True, cbar_kws={"shrink": .8})
+plt.title('Matrice di Correlazione')
+plt.show()
+
+
+
+
+
 
 # Calcolo dell'hedge ratio (slope della regressione)
 hedge_ratio = slope
