@@ -5,6 +5,9 @@ from condizioni_mercato import condizioni_mercato
 from hedge_ratio import calcola_hedge_ratio    # Importa la funzione per calcolare il hedge ratio
 #from condizioni_mercato import market_conditions 
 
+spot = 'Gas_Spot'
+future = 'UK_Future'
+log = "no"
 def main():
     # Esegui la funzione variabili per ottenere i dati combinati
     dati = variabili()
@@ -15,12 +18,12 @@ def main():
     # Mostra la matrice di correlazione calcolata
     print(correlation_matrix)
     #calcolo volatilita basis Risk:
-    rischio_base(dati)
+    rischio_base(dati, spot, future)
     # calcolo condizioni di mercato
-    condizioni_mercato(dati) 
+    condizioni_mercato(dati, spot, future) 
     #hedge ratio e test eteroschedasticità
     #calcola_hedge_ratio()
-    calcola_hedge_ratio()
+    calcola_hedge_ratio(spot, future, log)
 
 if __name__ == "__main__":
     main()

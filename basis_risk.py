@@ -3,19 +3,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 from caricamento_dati import variabili  # Importa la funzione per ottenere i dati
 
-def rischio_base(data):  # Modifica per accettare un argomento
+def rischio_base(data, spot, future):  # Modifica per accettare un argomento
     # Assicurati che i nomi delle colonne siano corretti
     # Sostituisci 'Gas_Spot' e 'NG_Future' con i nomi appropriati se sono diversi
-    data.columns = ['Gas_Spot', 'NG_Future', 'Brent_Future', 'WTI_Future', 'Heating_Oil', 'Gasoline', 'UK_Natural_Gas']
+    data.columns = ['Gas_Spot', 'Future_TTF', 'UK_Future', 'NG_Future', 'Brent_Future', 'WTI_Future', 'Heating_Oil', 'Gasoline']
 
     # Calcola la volatilità annualizzata
-    volatilità_spot = data['Gas_Spot'].pct_change().std() * np.sqrt(252)  # Annualizzata
-    volatilità_future = data['NG_Future'].pct_change().std() * np.sqrt(252)  # Annualizzata
+    volatilità_spot = data[spot].pct_change().std() * np.sqrt(252)  # Annualizzata
+    volatilità_future = data[future].pct_change().std() * np.sqrt(252)  # Annualizzata
 
     print("ANALISI BASIS RISK | " f"Volatilità Spot: {volatilità_spot:.4f}, Volatilità Future: {volatilità_future:.4f}")
 
     # Calcolo della base
-    data['Basis'] = data['Gas_Spot'] - data['NG_Future']
+    data['Basis'] = data[spot] - data[future]
 
     # Volatilità della base
     basis_volatility = data['Basis'].std()

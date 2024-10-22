@@ -4,13 +4,13 @@ import matplotlib.pyplot as plt
 import yfinance as yf
 
 # Funzione per scaricare dati storici da Yahoo Finance
-def get_data(ticker, start_date, end_date):
-    data = yf.download(ticker, start=start_date, end=end_date)
-    return data['Close']
+#def get_data(ticker, start_date, end_date):
+#    data = yf.download(ticker, start=start_date, end=end_date)
+#    return data['Close']
 
-def condizioni_mercato(data):  # Modifica per accettare un argomento
+def condizioni_mercato(data, spot, future):  # Modifica per accettare un argomento
     # Calcola il Basis
-    data['Basis'] = data['Gas_Spot'] - data['NG_Future']
+    data['Basis'] = data[spot] - data[future]
 
     # Determina le condizioni di mercato
     def market_conditions(row):

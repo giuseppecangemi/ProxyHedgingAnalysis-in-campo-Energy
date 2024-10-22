@@ -4,17 +4,21 @@ import matplotlib.pyplot as plt
 import statsmodels.api as sm
 from caricamento_dati import variabili  # Importa la funzione per ottenere i dati
 
-def calcola_hedge_ratio():
+def calcola_hedge_ratio(spot, future, log):
     # Ottieni i dati combinati
     data = variabili()
 
-    # Calcola il logaritmo dei prezzi
-    data['Log_Gas_Spot'] = np.log(data['Gas_Spot'])
-    data['Log_NG_Future'] = np.log(data['NG_Future'])
+    if log == "no":
+        # Calcola il logaritmo dei prezzi
+        data['Gas_Spot'] = np.log(data[spot])
+        data['NG_Future'] = np.log(data[future])
+    else:
+        data['Gas_Spot'] = data[spot]
+        data['NG_Future'] = data[future]  
 
     # Definire variabili indipendenti e dipendenti per la regressione
-    X = data['Log_NG_Future']  # Variabile indipendente (future)
-    Y = data['Log_Gas_Spot']    # Variabile dipendente (spot)
+    X = data['NG_Future']  # Variabile indipendente (future)
+    Y = data['Gas_Spot']    # Variabile dipendente (spot)
 
     # Aggiungere una costante per il termine di intercetta
     X = sm.add_constant(X)
@@ -35,8 +39,8 @@ def calcola_hedge_ratio():
 
     # Analisi della regressione
     plt.figure(figsize=(10, 6))
-    plt.scatter(data['Log_NG_Future'], data['Log_Gas_Spot'], color='blue', label='Dati')
-    plt.plot(data['Log_NG_Future'], model.fittedvalues, color='red', label='Regr. Lineare')
+    plt.scatter(data['NG_Future'], data['Gas_Spot'], color='blue', label='Dati')
+    plt.plot(data['NG_Future'], model.fittedvalues, color='red', label='Regr. Lineare')
     plt.title('Regressione Lineare: Prezzo Spot vs Prezzo Future')
     plt.xlabel('Log(Prezzo Future NG=F)')
     plt.ylabel('Log(Prezzo Spot TTF=F)')
@@ -46,8 +50,13 @@ def calcola_hedge_ratio():
 
     importo_spot = float(input("Inserisci l'importo da investire nel mercato spot: "))
     # Calcola l'importo da investire nei futures
-    importo_futures = importo_spot * np.exp(beta)
-    print(f"Importo da investire nei futures: {importo_futures:.2f}€")
+    if log == "si":
+        importo_futures = importo_spot * np.exp(beta)
+        print(f"Importo da investire nei futures: {importo_futures:.2f}€")
+    else:
+        importo_futures = importo_spot * beta
+        print(f"Importo da investire nei futures: {importo_futures:.2f}€")
+
     #TEST ETEROSCHEDASTICITA'
     print("TEST ETEROSCHEDASTICITA'... ")
 
