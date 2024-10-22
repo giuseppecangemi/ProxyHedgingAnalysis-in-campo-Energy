@@ -1,12 +1,3 @@
-import pandas as pd
-import numpy as np
-import yfinance as yf
-from scipy.stats import linregress
-import matplotlib.pyplot as plt
-import seaborn as sns
-import statsmodels.api as sm
-import statsmodels.stats.api as sms
-#---------------------------------------------------------------------------------------------------------------#
 from caricamento_dati import variabili  # Importa la funzione variabili
 from correlazione import correlation  # Importa la funzione correlation
 from basis_risk import rischio_base
@@ -30,7 +21,6 @@ def main():
     #hedge ratio e test eteroschedasticità
     #calcola_hedge_ratio()
     calcola_hedge_ratio()
-
 
 if __name__ == "__main__":
     main()
@@ -78,36 +68,3 @@ if __name__ == "__main__":
 #---------------------------------------------------------------------------------------------------------------#
 
 #---------------------------------------------------------------------------------------------------------------#
-#TEST Breusch-Pagan
-import statsmodels.stats.api as sms
-#il test viene eseguito sui residui, quindi fitto il modello e ottengo i residui
-fitted_values = model.fittedvalues
-residuals = model.resid
-# scatterplot: già si nota eteroschedasticità
-plt.figure(figsize=(10, 6))
-plt.scatter(fitted_values, residuals)
-plt.axhline(y=0, color='red', linestyle='--')
-plt.title('Grafico dei Residui vs Valori Predetti')
-plt.xlabel('Valori Predetti')
-plt.ylabel('Residui')
-plt.grid(True)
-plt.show()
-#test
-test_stat, p_value, _, _ = sms.het_breuschpagan(residuals, model.model.exog)
-print(f"Statistiche del test di Breusch-Pagan: {test_stat}, P-value: {p_value}")
-#se p-value < 0.05: rifiuto l'ipotesi nulla di non etoeroschedasticità
-#in questo caso c'è eteroschedasticità
-#se procedessi l'analisi, utilizzando la pendenza della retta di regressione come hedge ratio la mia stima sarebbe biased!
-#rimane eteroschedastico anche usando standard error robusti come di seguito:
-#model_robust = sm.OLS(Y, X).fit(cov_type='HC3') 
-
-
-
-
-
-
-
-
-
-
-

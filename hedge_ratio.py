@@ -48,7 +48,6 @@ def calcola_hedge_ratio():
     # Calcola l'importo da investire nei futures
     importo_futures = importo_spot * np.exp(beta)
     print(f"Importo da investire nei futures: {importo_futures:.2f}€")
-    #------------------------------------------------------------------------------#
     #TEST ETEROSCHEDASTICITA'
     print("TEST ETEROSCHEDASTICITA'... ")
 
@@ -62,8 +61,8 @@ def calcola_hedge_ratio():
     else:
         print(f"Il P-value {test_results[1]:.4f} è maggiore di 0.05: si rifiuta l'ipotesi alternativa -> omoschedasticità!!!")
     
-    return model  # Restituisce il modello per l'uso successivo
+    return model # Restituisce il modello per l'uso successivo
 
-if __name__ == "__main__":
-    model = calcola_hedge_ratio()  # Salva il modello restituito
+#if __name__ == "__main__":
+#    calcola_hedge_ratio()  # Salva il modello restituito
    # Esegui il test di eteroschedasticità
