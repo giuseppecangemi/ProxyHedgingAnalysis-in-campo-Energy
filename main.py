@@ -6,32 +6,84 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import statsmodels.api as sm
 import statsmodels.stats.api as sms
-
-# Funzione per scaricare dati storici da Yahoo Finance
-def get_data(ticker, start_date, end_date):
-    data = yf.download(ticker, start=start_date, end=end_date)
-    return data['Close']
-
-# Scarica dati storici per il GAS Naturale e il Future TTF
-start_date = "2023-01-01"
-end_date = "2024-01-01"
-gas_spot = get_data('TTF=F', start_date, end_date)  # Gas naturale: utilizzo il future del gas naturale europeo come proxy per il gas naturale commodity ita
-gas_future = get_data('NG=F', start_date, end_date) # Future: utilizzo il future americano maggiormente liquido
-gas_spot = np.log(gas_spot)
-gas_future = np.log(gas_future)
-#grafiici
-plt.plot(gas_spot, label="Prezzo SPOT Gas Naturale")
-plt.plot(gas_future, label="Prezzo FUTURE sul Gas Naturale")
-plt.legend()
-plt.show()
-
-# Unisci i dataset per la correlazione
-data = pd.DataFrame({'Gas_Spot': gas_spot, 'TTF_Future': gas_future}).dropna()
 #---------------------------------------------------------------------------------------------------------------#
-# Calcolo della correlazione e dell'hedge ratio
-correlation = data.corr().iloc[0, 1] #correlazione non buonissima
+from caricamento_dati import variabili  # Importa la funzione variabili
+from correlazione import correlation  # Importa la funzione correlation
+from basis_risk import rischio_base
+from condizioni_mercato import condizioni_mercato
+from hedge_ratio import calcola_hedge_ratio  # Importa la funzione per calcolare il hedge ratio
+#from condizioni_mercato import market_conditions 
+
+def main():
+    # Esegui la funzione variabili per ottenere i dati combinati
+    dati = variabili()
+
+    # Visualizza i dati per confermare che tutto funzioni correttamente
+    print(dati)
+
+    # Calcola e visualizza la matrice di correlazione passando i dati
+    correlation_matrix = correlation(dati)
+
+    # Mostra la matrice di correlazione calcolata
+    print(correlation_matrix)
+
+    #calcolo volatilita basis Risk:
+    rischio_base(dati)
+
+    # calcolo condizioni di mercato
+    condizioni_mercato(dati) 
+
+    #hedge ratio
+    calcola_hedge_ratio()
+
+if __name__ == "__main__":
+    main()
+   
+
+
+#---------------------------------------------------------------------------------------------------------------#
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#---------------------------------------------------------------------------------------------------------------#
+#---------------------------------------------------------------------------------------------------------------#
+#effettivamente vedo un'ottima correlazione!!!!
+#RISSUNTO SCELTE VARIABILI:
+    #UTILIZZO IL TTF EUROPEO COME PROXY DEL PREZZO SPOT DEL GAS NATURALE ITALIAN0. MI ASPETTO CHE SIANO ALTAMENTE CORRELATI
+    #PER COPRIRMI DA UN ACQUISTO DI GAS NATURALE ITALIANO VADO SHORT SUL FUTURE DEL GAS NATURALE UK:
+        #DALLE ANALISI EFFETTUATE SI HA UNA CORR. 0.92 - SUFFRAGATA ANCHE DALL'ANALISI SU TRADING ECONOMICS!!
+        #FACCIO QUESTO PROXY HEDGING POICHé NON TROVO STRUMENTI LIQUIDI PER LA COMMODITY GAS NAT ITA -> DEVIO SU GAS NAT UK FUTURE!
+#richiamo le variabili da usare:
+#      - gas_spot     (FUTURE USATO COME SPOT)
+#      - uk_naturalgas (FUTURE)
+#---------------------------------------------------------------------------------------------------------------#
+#---------------------------------------------------------------------------------------------------------------#
+# Regressione + Hedge Ratio sulle variabili maggiormente correlate
+#devo fare una regressione cercando di spiegare il movimento del prezzo spot con quello del future
 # Variabile indipendente 
-X = data['TTF_Future']
+X = data['uk_naturalgas']
 # Variabile dipendente 
 Y = data['Gas_Spot']
 #aggiiungo costante
@@ -43,7 +95,7 @@ intercept = model.params[0]
 slope = model.params[1]
 #analisi della regressione:
 plt.figure(figsize=(10, 6))
-sns.regplot(x='Gas_Spot', y='TTF_Future', data=data, line_kws={"color": "red"})
+sns.regplot(x='Gas_Spot', y='uk_naturalgas', data=data, line_kws={"color": "red"})
 plt.title(f"Correlazione e Regressione tra NG=F e TTF=F (Correlazione: {correlation:.2f})")
 plt.xlabel('Prezzo Future NG=F')
 plt.ylabel('Prezzo Future TTF=F')
