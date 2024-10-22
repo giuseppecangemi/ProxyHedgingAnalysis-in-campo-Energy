@@ -11,30 +11,26 @@ from caricamento_dati import variabili  # Importa la funzione variabili
 from correlazione import correlation  # Importa la funzione correlation
 from basis_risk import rischio_base
 from condizioni_mercato import condizioni_mercato
-from hedge_ratio import calcola_hedge_ratio  # Importa la funzione per calcolare il hedge ratio
+from hedge_ratio import calcola_hedge_ratio    # Importa la funzione per calcolare il hedge ratio
 #from condizioni_mercato import market_conditions 
 
 def main():
     # Esegui la funzione variabili per ottenere i dati combinati
     dati = variabili()
-
     # Visualizza i dati per confermare che tutto funzioni correttamente
     print(dati)
-
     # Calcola e visualizza la matrice di correlazione passando i dati
     correlation_matrix = correlation(dati)
-
     # Mostra la matrice di correlazione calcolata
     print(correlation_matrix)
-
     #calcolo volatilita basis Risk:
     rischio_base(dati)
-
     # calcolo condizioni di mercato
     condizioni_mercato(dati) 
-
-    #hedge ratio
+    #hedge ratio e test eteroschedasticità
+    #calcola_hedge_ratio()
     calcola_hedge_ratio()
+
 
 if __name__ == "__main__":
     main()
@@ -80,29 +76,7 @@ if __name__ == "__main__":
 #      - uk_naturalgas (FUTURE)
 #---------------------------------------------------------------------------------------------------------------#
 #---------------------------------------------------------------------------------------------------------------#
-# Regressione + Hedge Ratio sulle variabili maggiormente correlate
-#devo fare una regressione cercando di spiegare il movimento del prezzo spot con quello del future
-# Variabile indipendente 
-X = data['uk_naturalgas']
-# Variabile dipendente 
-Y = data['Gas_Spot']
-#aggiiungo costante
-X = sm.add_constant(X)
-# Fit del modello di regressione
-model = sm.OLS(Y, X).fit()
-print(model.summary())
-intercept = model.params[0]
-slope = model.params[1]
-#analisi della regressione:
-plt.figure(figsize=(10, 6))
-sns.regplot(x='Gas_Spot', y='uk_naturalgas', data=data, line_kws={"color": "red"})
-plt.title(f"Correlazione e Regressione tra NG=F e TTF=F (Correlazione: {correlation:.2f})")
-plt.xlabel('Prezzo Future NG=F')
-plt.ylabel('Prezzo Future TTF=F')
-plt.grid(True)
-plt.show()
-#osserviamo una possibile eteroskedasticità
-#sviluppo i test per verificarla
+
 #---------------------------------------------------------------------------------------------------------------#
 #TEST Breusch-Pagan
 import statsmodels.stats.api as sms
@@ -137,33 +111,3 @@ print(f"Statistiche del test di Breusch-Pagan: {test_stat}, P-value: {p_value}")
 
 
 
-
-
-correlation_matrix = data.corr()
-
-# Stampa la matrice di correlazione
-print(correlation_matrix)
-
-# Visualizza la matrice di correlazione con una heatmap
-plt.figure(figsize=(8, 6))
-sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt='.2f', square=True, cbar_kws={"shrink": .8})
-plt.title('Matrice di Correlazione')
-plt.show()
-
-
-
-
-
-
-# Calcolo dell'hedge ratio (slope della regressione)
-hedge_ratio = slope
-
-# Quantità monetaria del contratto di vendita
-contract_value = 10000  # Esempio di 10k euro
-
-# Valore di future da comprare per hedging
-hedge_value = contract_value * hedge_ratio
-
-print(f"Correlazione tra gas spot e future: {correlation}")
-print(f"Hedge Ratio: {hedge_ratio}")
-print(f"Valore del future da comprare per hedging: {hedge_value}")
