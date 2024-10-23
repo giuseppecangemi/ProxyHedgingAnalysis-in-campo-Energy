@@ -4,10 +4,12 @@ from basis_risk import rischio_base
 from condizioni_mercato import condizioni_mercato
 from hedge_ratio import calcola_hedge_ratio    # Importa la funzione per calcolare il hedge ratio
 #from condizioni_mercato import market_conditions 
+from stazionarieta import stazionarieta
+from GARCH_hedge_ratio import calcola_rendimenti, ccgarch_hedge_ratio
 
 spot = 'Gas_Spot'
 future = 'UK_Future'
-log = "no"
+log = "si"
 def main():
     # Esegui la funzione variabili per ottenere i dati combinati
     dati = variabili()
@@ -17,6 +19,8 @@ def main():
     correlation_matrix = correlation(dati)
     # Mostra la matrice di correlazione calcolata
     print(correlation_matrix)
+    #stzionarietà
+    stazionarieta(dati)  
     #calcolo volatilita basis Risk:
     rischio_base(dati, spot, future)
     # calcolo condizioni di mercato
@@ -25,49 +29,13 @@ def main():
     #calcola_hedge_ratio()
     calcola_hedge_ratio(spot, future, log)
 
+    #GARCH
+    rendimenti = calcola_rendimenti()
+    print(rendimenti)
+
+    ccgarch_hedge_ratio()
+
 if __name__ == "__main__":
     main()
    
-
-
-#---------------------------------------------------------------------------------------------------------------#
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#---------------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------------#
-#effettivamente vedo un'ottima correlazione!!!!
-#RISSUNTO SCELTE VARIABILI:
-    #UTILIZZO IL TTF EUROPEO COME PROXY DEL PREZZO SPOT DEL GAS NATURALE ITALIAN0. MI ASPETTO CHE SIANO ALTAMENTE CORRELATI
-    #PER COPRIRMI DA UN ACQUISTO DI GAS NATURALE ITALIANO VADO SHORT SUL FUTURE DEL GAS NATURALE UK:
-        #DALLE ANALISI EFFETTUATE SI HA UNA CORR. 0.92 - SUFFRAGATA ANCHE DALL'ANALISI SU TRADING ECONOMICS!!
-        #FACCIO QUESTO PROXY HEDGING POICHé NON TROVO STRUMENTI LIQUIDI PER LA COMMODITY GAS NAT ITA -> DEVIO SU GAS NAT UK FUTURE!
-#richiamo le variabili da usare:
-#      - gas_spot     (FUTURE USATO COME SPOT)
-#      - uk_naturalgas (FUTURE)
-#---------------------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------------------#
-
 #---------------------------------------------------------------------------------------------------------------#

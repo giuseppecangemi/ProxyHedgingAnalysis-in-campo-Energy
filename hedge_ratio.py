@@ -8,16 +8,16 @@ def calcola_hedge_ratio(spot, future, log):
     # Ottieni i dati combinati
     data = variabili()
 
-    if log == "no":
+    if log == "no": #da selezionare in base all'analisi sulla stazionarietà
         # Calcola il logaritmo dei prezzi
         data['Gas_Spot'] = np.log(data[spot])
-        data['NG_Future'] = np.log(data[future])
+        data['Future'] = np.log(data[future])
     else:
         data['Gas_Spot'] = data[spot]
-        data['NG_Future'] = data[future]  
+        data['Future'] = data[future]  
 
     # Definire variabili indipendenti e dipendenti per la regressione
-    X = data['NG_Future']  # Variabile indipendente (future)
+    X = data['Future']  # Variabile indipendente (future)
     Y = data['Gas_Spot']    # Variabile dipendente (spot)
 
     # Aggiungere una costante per il termine di intercetta
@@ -39,8 +39,8 @@ def calcola_hedge_ratio(spot, future, log):
 
     # Analisi della regressione
     plt.figure(figsize=(10, 6))
-    plt.scatter(data['NG_Future'], data['Gas_Spot'], color='blue', label='Dati')
-    plt.plot(data['NG_Future'], model.fittedvalues, color='red', label='Regr. Lineare')
+    plt.scatter(data['Future'], data['Gas_Spot'], color='blue', label='Dati')
+    plt.plot(data['Future'], model.fittedvalues, color='red', label='Regr. Lineare')
     plt.title('Regressione Lineare: Prezzo Spot vs Prezzo Future')
     plt.xlabel('Log(Prezzo Future NG=F)')
     plt.ylabel('Log(Prezzo Spot TTF=F)')
