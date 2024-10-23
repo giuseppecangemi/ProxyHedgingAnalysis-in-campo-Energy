@@ -1,9 +1,10 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from caricamento_dati import variabili  # Importa la funzione per ottenere i dati
+from caricamento_dati import variabili  
 from statsmodels.tsa.stattools import adfuller
 
+#creo la funzione adf_test per sviluppare il test ADFuller e quindi testare la stazionarietà della serie
 def adf_test(series, title=''):
     print(f'Resultati del Test di Dickey-Fuller Aumentato per {title}:')
     result = adfuller(series.dropna(), autolag='AIC')
@@ -16,10 +17,10 @@ def adf_test(series, title=''):
         print("La serie non è stazionaria (non posso rifiutare l'ipotesi nulla)")
     print('')
 
-
-def stazionarieta(data):
-    diff_gas_spot = data.Gas_Spot.diff().dropna()
-    diff_gas_future = data.UK_Future.diff().dropna()
+#plotto i grafici stazionari e il relativo test
+def stazionarieta(data, spot, future):
+    diff_gas_spot = data[spot].diff().dropna()
+    diff_gas_future = data[future].diff().dropna()
 
     plt.figure(figsize=(12, 6))
     plt.subplot(211)
