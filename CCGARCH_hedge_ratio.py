@@ -35,15 +35,21 @@ def ccgarch_hedge_ratio(spot, future):
     dati = calcola_rendimenti(spot, future) 
 
     # Modello GARCH(1,1) sui rendimenti dello spot
-    model_spot = arch_model(dati['Return_Spot'].dropna(), vol='Garch', p=1, q=1, dist='normal')
+    model_spot = arch_model(dati['Return_Spot'].dropna(), vol='Garch', p=1, q=1, dist='t') #qui metto distribuzione t-stud perché è maggiormente fittante
     res_spot = model_spot.fit(disp='off') 
     # Modello GARCH(1,1) sui rendimenti del future
-    model_future = arch_model(dati['Return_Future'].dropna(), vol='Garch', p=1, q=1, dist='normal')
+    model_future = arch_model(dati['Return_Future'].dropna(), vol='Garch', p=1, q=1, dist='t') #qui metto distribuzione t-stud perché è maggiormente fittante
     res_future = model_future.fit(disp='off')
 
     #ottengo le varianze condizionali
     h_future = res_future.conditional_volatility
     h_spot = res_spot.conditional_volatility
+    #devo elevarle al quadrato per ottenere le varianze condizionate!!!
+    #dal paper "A comparison of multivariate GARCH models with respect to Value at Risk" CCC_DCC_models -> devo usare le standard dev e non le varianze!!!
+    #h_future = res_future.conditional_volatility**2
+    #h_spot = res_spot.conditional_volatility**2
+    #DA APPROFONDIRE IL PAPER DI BOLLORSLEV
+
 
     #qui si assume che la correlazione tra spot e future sia costante nel tempo
     correlation = dati['Return_Spot'].corr(dati['Return_Future'])  
@@ -77,7 +83,7 @@ def ccgarch_hedge_ratio(spot, future):
     plt.show()
 
     #qui printo la volatilità NON condizionata (dovrebbe essere alpha + beta)
-    print("VOLATILITà NON CONDIZIONATA:")
+    print("VOLATILITà NON CONDIZIONATA")
     omega_future = res_future.params['omega']
     alpha_future = res_future.params['alpha[1]']
     beta_future = res_future.params['beta[1]']
