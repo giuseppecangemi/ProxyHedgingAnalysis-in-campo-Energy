@@ -3,6 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
 from caricamento_dati import variabili  
+import seaborn as sns
+from CCGARCH_hedge_ratio import calcola_var
 
 def OLS_hedge_ratio(spot, future, log):
     #prendo i dati dalla funzione scritta sullo script caricamento_dati
@@ -155,6 +157,83 @@ def OLS_hedge_ratio(spot, future, log):
         importo_futures = importo_spot * beta
         print(f"Importo da investire nei futures: {importo_futures:.2f}€")
 
+    #-----------------------------------------------------------------------------------------------------------------------------------------------#
+    #VALUTAZIONE HEDGING 
+    #uno degli elementi di rischio sui mercati è la volatilità. Pertanto vogliamo capire se l'utilizzo di questi hedge ratio siano in grado di ridurla.
+    X = data_cleaned['Future_returns']  #variabile indipendente (future)
+    Y = data_cleaned['Gas_Spot_returns'] 
+    varianza_no_hedge = data_cleaned['Gas_Spot_returns'].var()
+    
+    #calcolo i rendimenti coperti con il modello GARCH, quindi i rendimenti dello spot meno la quota (h) dei rendimenti future
+    rendimenti_coperti_ccgarch = data_cleaned['Gas_Spot_returns'] - (beta * data_cleaned['Future_returns'])
+    
+    #calcolo la varianza della copertura con il modello GARCH
+    varianza_hedge_ccgarch = rendimenti_coperti_ccgarch.var()
+    
+    #per comprendere se il modello GARCH ci riduce la varianza, faccio la differenza percentuale tra la varianza dei rendimenti spot - varianza della copertura
+    riduzione_varianza_ccgarch = (varianza_no_hedge - varianza_hedge_ccgarch) / varianza_no_hedge * 100
+    print(f"Varianza NO hedge: {varianza_no_hedge:.2f}%")
+    print(f"Varianza hedge OLS: {varianza_hedge_ccgarch:.2f}%")
+    print(f"Riduzione della varianza con OLS: {riduzione_varianza_ccgarch:.2f}%")
+   
+    #allo stesso modo calcolo i rendimenti del modello naive: cioè investo la stessa quota dello spot sul future 
+    OHR_naive = 1
+    rendimenti_coperti_naive = data_cleaned['Gas_Spot_returns'] - (OHR_naive * data_cleaned['Future_returns'])
+
+    #calcolo quindi la varianza del modello naive
+    varianza_hedge_naive = rendimenti_coperti_naive.var()
+
+    #calcolo la riduzione della varianza per il modello naive
+    riduzione_varianza_naive = (varianza_no_hedge - varianza_hedge_naive) / varianza_no_hedge * 100
+    print(f"Riduzione della varianza (Naïve): {riduzione_varianza_naive:.2f}%")
+
+    #qui calcolo la differenza della riduzione della varianza tra naive e OLS
+    differenza_modelli_riduzione_varianza = riduzione_varianza_ccgarch - riduzione_varianza_naive
+    print(f"Differenza nella riduzione della varianza (OLS - Naïve): {differenza_modelli_riduzione_varianza:.2f}%")
+
+    var_no_hedge = calcola_var(data_cleaned['Gas_Spot_returns'])
+    var_hedged = calcola_var(data_cleaned['Gas_Spot_returns'] - (beta * data_cleaned['Future_returns']))
+    var_naive = calcola_var( data_cleaned['Gas_Spot_returns'] - (OHR_naive * data_cleaned['Future_returns']))
+
+    print(f"Value at Risk (No Hedge): {var_no_hedge:.4f}")
+    print(f"Value at Risk (Hedged OLS): {var_hedged:.4f}")
+    print(f"Value at Risk (Hedged Naive): {var_naive:.4f}")
+
+    #plot delle distribuzioni
+    plt.figure(figsize=(14, 6))
+
+    #distribuzione dei rendimenti No Hedge
+    plt.subplot(1, 3, 1)
+    sns.histplot(data_cleaned['Gas_Spot_returns'], bins=30, kde=True, color='blue', stat='density')
+    plt.axvline(var_no_hedge, color='red', linestyle='--', label=f'VaR No Hedge: {var_no_hedge:.4f}')
+    plt.title('Distribuzione dei Rendimenti - No Hedge')
+    plt.xlabel('Rendimenti')
+    plt.ylabel('Densità')
+    plt.legend()
+    plt.grid(True)
+
+    #distribuzione dei rendimenti Hedged GARCH
+    plt.subplot(1, 3, 2)
+    sns.histplot(rendimenti_coperti_ccgarch, bins=30, kde=True, color='green', stat='density')
+    plt.axvline(var_hedged, color='red', linestyle='--', label=f'VaR Hedged OLS: {var_hedged:.4f}')
+    plt.title('Distribuzione dei Rendimenti - Hedged OLS')
+    plt.xlabel('Rendimenti')
+    plt.ylabel('Densità')
+    plt.legend()
+    plt.grid(True)
+
+    #distribuzione dei rendimenti Naive
+    plt.subplot(1, 3, 3)
+    sns.histplot(rendimenti_coperti_naive, bins=30, kde=True, color='red', stat='density')
+    plt.axvline(var_naive, color='red', linestyle='--', label=f'VaR Hedged Naive: {var_naive:.4f}')
+    plt.title('Distribuzione dei Rendimenti - Hedged Naive')
+    plt.xlabel('Rendimenti')
+    plt.ylabel('Densità')
+    plt.legend()
+    plt.grid(True)
+
+    plt.tight_layout()
+    plt.show()
 
     return model
 
