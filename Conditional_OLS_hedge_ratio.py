@@ -18,6 +18,7 @@ def conditional_OLS_hedge_ratio(spot, future, log):
         data['Gas_Spot_returns'] = data[spot].pct_change() 
         data['Future_returns'] = data[future].pct_change() 
 
+
     # Creazione delle variabili ritardate
     data['Future_returns_lag'] = data['Future_returns'].shift(1)
     data['Base_lag'] = (data['Gas_Spot_returns'] - data['Future_returns']).shift(1)  # Calcola la base e crea lag
@@ -32,6 +33,9 @@ def conditional_OLS_hedge_ratio(spot, future, log):
     Y = data_cleaned['Gas_Spot_returns']  # Variabile dipendente (spot)
     # Variabili indipendenti includendo il Future Return, le variabili laggate e le interazioni
     X = data_cleaned[['Future_returns', 'Interaction_lag']]
+    #Siccome posso anche creare beta1 e beta2 con i lag (paper Miffre) provo a vedere se cambia qualcosa come stima
+    X = data_cleaned[['Future_returns', 'Future_returns_lag', 'Base_lag', 'P_Base_lag']]
+
 
     # Aggiungo la costante nel modello di regressione
     X = sm.add_constant(X)
