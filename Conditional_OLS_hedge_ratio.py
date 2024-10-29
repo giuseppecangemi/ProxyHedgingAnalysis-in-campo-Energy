@@ -20,8 +20,8 @@ def conditional_OLS_hedge_ratio(spot, future, log):
 
 
     # Creazione delle variabili ritardate
-    data['Future_returns_lag'] = data['Future_returns'].shift(1)
-    data['Base_lag'] = (data['Gas_Spot_returns'] - data['Future_returns']).shift(1)  # Calcola la base e crea lag
+    data['Future_returns_lag'] = data['Future_returns'].shift(1) * data['Future_returns']
+    data['Base_lag'] = (data['Gas_Spot_returns'].shift(1) - data['Future_returns'].shift(1)) * data['Future_returns'] # Calcola la base e crea lag
 
     # Interazione tra Future Return e variabili laggate
     data['Interaction_lag'] = data['Future_returns'] * (data['Future_returns_lag'] + data['Base_lag'])
@@ -34,8 +34,9 @@ def conditional_OLS_hedge_ratio(spot, future, log):
     # Variabili indipendenti includendo il Future Return, le variabili laggate e le interazioni
     X = data_cleaned[['Future_returns', 'Interaction_lag']]
     #Siccome posso anche creare beta1 e beta2 con i lag (paper Miffre) provo a vedere se cambia qualcosa come stima
-    X = data_cleaned[['Future_returns', 'Future_returns_lag', 'Base_lag', 'P_Base_lag']]
-
+    X = data_cleaned[['Future_returns', 'Future_returns_lag', 'Base_lag']]
+    #in questo caso però stimo il modello in-sample e successivamente devo aggiungere al campione una nuova settimana e ricalibrare il modello. Si genereranno nuovi parametri che terranno conto dell'introduzoine delle nuove info.
+    #RISULTATI NON INCORAGGIANTI!!!!
 
     # Aggiungo la costante nel modello di regressione
     X = sm.add_constant(X)

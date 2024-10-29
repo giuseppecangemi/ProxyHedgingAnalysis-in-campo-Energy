@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import statsmodels.api as sm
 from caricamento_dati import variabili  
 import seaborn as sns
-from CCGARCH_hedge_ratio import calcola_var
+from CCGARCH_hedge_ratio import calcola_var, calcola_cvar
 
 def OLS_hedge_ratio(spot, future, log):
     #prendo i dati dalla funzione scritta sullo script caricamento_dati
@@ -192,8 +192,12 @@ def OLS_hedge_ratio(spot, future, log):
     print(f"Differenza nella riduzione della varianza (OLS - Naïve): {differenza_modelli_riduzione_varianza:.2f}%")
 
     var_no_hedge = calcola_var(data_cleaned['Gas_Spot_returns'])
+    cvar_no_hedge = calcola_cvar(data_cleaned['Gas_Spot_returns'])
+
     var_hedged = calcola_var(data_cleaned['Gas_Spot_returns'] - (beta * data_cleaned['Future_returns']))
+    cvar_hedged = calcola_cvar(data_cleaned['Gas_Spot_returns'] - (beta * data_cleaned['Future_returns']))
     var_naive = calcola_var( data_cleaned['Gas_Spot_returns'] - (OHR_naive * data_cleaned['Future_returns']))
+    cvar_naive = calcola_cvar(data_cleaned['Gas_Spot_returns'] - (OHR_naive * data_cleaned['Future_returns']))
 
     print(f"Value at Risk (No Hedge): {var_no_hedge:.4f}")
     print(f"Value at Risk (Hedged OLS): {var_hedged:.4f}")
@@ -206,6 +210,7 @@ def OLS_hedge_ratio(spot, future, log):
     plt.subplot(1, 3, 1)
     sns.histplot(data_cleaned['Gas_Spot_returns'], bins=30, kde=True, color='blue', stat='density')
     plt.axvline(var_no_hedge, color='red', linestyle='--', label=f'VaR No Hedge: {var_no_hedge:.4f}')
+    plt.axvline(cvar_no_hedge, color='orange', linestyle='--', label=f'CVaR: {cvar_no_hedge:.4f}')
     plt.title('Distribuzione dei Rendimenti - No Hedge')
     plt.xlabel('Rendimenti')
     plt.ylabel('Densità')
@@ -216,6 +221,7 @@ def OLS_hedge_ratio(spot, future, log):
     plt.subplot(1, 3, 2)
     sns.histplot(rendimenti_coperti_ccgarch, bins=30, kde=True, color='green', stat='density')
     plt.axvline(var_hedged, color='red', linestyle='--', label=f'VaR Hedged OLS: {var_hedged:.4f}')
+    plt.axvline(cvar_hedged, color='orange', linestyle='--', label=f'CVaR: {cvar_hedged:.4f}')
     plt.title('Distribuzione dei Rendimenti - Hedged OLS')
     plt.xlabel('Rendimenti')
     plt.ylabel('Densità')
@@ -226,6 +232,7 @@ def OLS_hedge_ratio(spot, future, log):
     plt.subplot(1, 3, 3)
     sns.histplot(rendimenti_coperti_naive, bins=30, kde=True, color='red', stat='density')
     plt.axvline(var_naive, color='red', linestyle='--', label=f'VaR Hedged Naive: {var_naive:.4f}')
+    plt.axvline(cvar_naive, color='orange', linestyle='--', label=f'CVaR: {cvar_naive:.4f}')
     plt.title('Distribuzione dei Rendimenti - Hedged Naive')
     plt.xlabel('Rendimenti')
     plt.ylabel('Densità')

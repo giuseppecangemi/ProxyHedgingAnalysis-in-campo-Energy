@@ -30,6 +30,10 @@ def naive_hedge_ratio():
 def calcola_var(rendimenti, alpha=0.05):
     return np.percentile(rendimenti, 100 * alpha)
 
+def calcola_cvar(rendimenti, livello_confidenza=0.05):
+    var = calcola_var(rendimenti, livello_confidenza)
+    return rendimenti[rendimenti <= var].mean()
+
 #sviluppo modello Constant Correlation GARCH (CCGARCH)
 def ccgarch_hedge_ratio(spot, future):
     dati = calcola_rendimenti(spot, future) 
@@ -136,6 +140,10 @@ def ccgarch_hedge_ratio(spot, future):
     var_hedged = calcola_var(dati['Return_Spot'] - (OHR * dati['Return_Future']))
     var_naive = calcola_var( dati['Return_Spot'] - (OHR_naive * dati['Return_Future']))
 
+    cvar_no_hedge = calcola_cvar(dati['Return_Spot'])
+    cvar_hedged = calcola_cvar(dati['Return_Spot'] - (OHR * dati['Return_Future']))
+    cvar_naive = calcola_cvar( dati['Return_Spot'] - (OHR_naive * dati['Return_Future']))
+
     print(f"Value at Risk (No Hedge): {var_no_hedge:.4f}")
     print(f"Value at Risk (Hedged GARCH): {var_hedged:.4f}")
     print(f"Value at Risk (Hedged Naive): {var_naive:.4f}")
@@ -147,6 +155,7 @@ def ccgarch_hedge_ratio(spot, future):
     plt.subplot(1, 3, 1)
     sns.histplot(dati['Return_Spot'], bins=30, kde=True, color='blue', stat='density')
     plt.axvline(var_no_hedge, color='red', linestyle='--', label=f'VaR No Hedge: {var_no_hedge:.4f}')
+    plt.axvline(cvar_no_hedge, color='orange', linestyle='--', label=f'CVaR: {cvar_no_hedge:.4f}')
     plt.title('Distribuzione dei Rendimenti - No Hedge')
     plt.xlabel('Rendimenti')
     plt.ylabel('Densità')
@@ -157,6 +166,7 @@ def ccgarch_hedge_ratio(spot, future):
     plt.subplot(1, 3, 2)
     sns.histplot(rendimenti_coperti_ccgarch, bins=30, kde=True, color='green', stat='density')
     plt.axvline(var_hedged, color='red', linestyle='--', label=f'VaR Hedged GARCH: {var_hedged:.4f}')
+    plt.axvline(cvar_hedged, color='orange', linestyle='--', label=f'CVaR: {cvar_hedged:.4f}')
     plt.title('Distribuzione dei Rendimenti - Hedged CCGARCH')
     plt.xlabel('Rendimenti')
     plt.ylabel('Densità')
@@ -167,6 +177,7 @@ def ccgarch_hedge_ratio(spot, future):
     plt.subplot(1, 3, 3)
     sns.histplot(rendimenti_coperti_naive, bins=30, kde=True, color='red', stat='density')
     plt.axvline(var_naive, color='red', linestyle='--', label=f'VaR Hedged Naive: {var_naive:.4f}')
+    plt.axvline(cvar_naive, color='orange', linestyle='--', label=f'CVaR: {cvar_naive:.4f}')
     plt.title('Distribuzione dei Rendimenti - Hedged Naive')
     plt.xlabel('Rendimenti')
     plt.ylabel('Densità')

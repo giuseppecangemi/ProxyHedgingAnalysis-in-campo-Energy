@@ -23,15 +23,15 @@ def main():
     # calcolo condizioni di mercato
     #condizioni_mercato(dati, spot, future) 
     #OLS hedge ratio e test eteroschedasticità
-    #OLS_hedge_ratio(spot, future, log)
+    OLS_hedge_ratio(spot, future, log)
     #CONDITIONAL OLS HEDGE RATIO
-    conditional_OLS_hedge_ratio(spot, future, log)
+    #conditional_OLS_hedge_ratio(spot, future, log)
     #stzionarietà
     #stazionarieta(dati, spot, future) 
     #Constant Correlation GARCH
     #rendimenti = calcola_rendimenti(spot, future)
     #print(rendimenti)
-    #ccgarch_hedge_ratio(spot, future)
+    ccgarch_hedge_ratio(spot, future)
 
     #Dynamic Correlation GARCH
     #dcc_garch_hedge_ratio(spot, future)
