@@ -7,7 +7,7 @@ def get_data(ticker, start_date, end_date):
     data = yf.download(ticker, start=start_date, end=end_date)
     return data['Close']
 
-def variabili():
+def variabili_returns():
     #definisco le date -> dovrei usare dei parametri e organizzarle sul main. però uso un excel con i dati a2a, quindi nel caso dovrei prevedere data manipulation
     start_date = "2023-01-01"
     end_date = "2024-01-01"
@@ -29,14 +29,14 @@ def variabili():
 
     #creo il df
     data = pd.DataFrame({
-        'Gas_Spot': prezzo_spot,
-        'Future_TTF': gas_future_ttf,
-        'UK_Future': uk_naturalgas,
-        'NG_Future': gas_future,
-        'Brent_Future': brent_future,
-        'WTI_Future': wti_future,
-        'Heating_Oil': heating_oil,
-        'Gasoline': gasoline,
+        'Gas_Spot': prezzo_spot.pct_change(),
+        'Future_TTF': gas_future_ttf.pct_change(),
+        'UK_Future': uk_naturalgas.pct_change(),
+        'NG_Future': gas_future.pct_change(),
+        'Brent_Future': brent_future.pct_change(),
+        'WTI_Future': wti_future.pct_change(),
+        'Heating_Oil': heating_oil.pct_change(),
+        'Gasoline': gasoline.pct_change(),
         
     })
 
